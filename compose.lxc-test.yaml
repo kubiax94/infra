@@ -1,0 +1,12 @@
+services:
+  postgres:
+    cpus: !reset null
+    mem_limit: !reset null
+
+  gitea:
+    cpus: !reset null
+    mem_limit: !reset null
+
+  redmine:
+    cpus: !reset null
+    mem_limit: !reset null

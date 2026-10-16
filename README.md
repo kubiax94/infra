@@ -36,6 +36,38 @@ docker compose logs --tail 100 gitea redmine
 
 ## Adresy i pierwsze logowanie
 
+### Lokalny test w Alpine LXC bez obslugi limitow cgroup
+
+Tylko dla testowego CT104: `compose.lxc-test.yaml` usuwa limity CPU i RAM
+kontenerow, nie zmieniajac glownego pliku. Nie naprawia konfiguracji cgroups;
+omija ustawianie tych limitow. Wymaga Compose 2.24.4 lub nowszego (`!reset`).
+
+```sh
+docker compose -f compose.yaml -f compose.lxc-test.yaml config --quiet
+docker compose -f compose.yaml -f compose.lxc-test.yaml up -d
+docker compose -f compose.yaml -f compose.lxc-test.yaml ps
+```
+
+Nie usuwaj wolumenow. Porty, sieci, hasla i dane pozostaja bez zmian.
+Limit calego LXC nadal obowiazuje. Przy 1 GiB RAM + 1 GiB swap i innych
+dzialajacych kontenerach moze zabraknac pamieci, a OOM moze dotknac inne
+aplikacje w tym LXC. To nie jest wariant produkcyjny ani gwarancja startu.
+Inne problemy z cgroups moga nadal uniemozliwic uruchomienie.
+
+Do kolejnych operacji zmieniajacych kontenery uzywaj obu plikow, np.:
+
+```sh
+docker compose -f compose.yaml -f compose.lxc-test.yaml logs --tail 100
+docker compose -f compose.yaml -f compose.lxc-test.yaml stop
+```
+
+Zwykle `docker compose up -d` ponownie zastosuje limity z glownego pliku.
+Skrypt backupu wykonuje tylko operacje odczytu na dzialajacych kontenerach,
+wiec nie wlacza limitow ponownie. Backup obejmuje glowny plik Compose;
+testowy override nie jest dolaczany do archiwum.
+
+### Adresy
+
 | Usluga | Adres |
 | --- | --- |
 | Gitea WWW | http://localhost:13000 |
