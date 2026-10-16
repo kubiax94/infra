@@ -1,0 +1,93 @@
+name: greg-local-tools
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  postgres:
+    image: postgres:16-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run sh initialize-local-env.sh first}
+      GITEA_DB_PASSWORD: ${GITEA_DB_PASSWORD:?Run sh initialize-local-env.sh first}
+      REDMINE_DB_PASSWORD: ${REDMINE_DB_PASSWORD:?Run sh initialize-local-env.sh first}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres-init.sh:/docker-entrypoint-initdb.d/10-app-databases.sh:ro
+    networks:
+      - gitea
+      - redmine
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    cpus: 0.5
+    mem_limit: 512m
+    logging: *logging
+
+  gitea:
+    image: docker.gitea.com/gitea:1
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      GITEA__database__DB_TYPE: postgres
+      GITEA__database__HOST: postgres:5432
+      GITEA__database__NAME: gitea
+      GITEA__database__USER: gitea
+      GITEA__database__PASSWD: ${GITEA_DB_PASSWORD:?Run sh initialize-local-env.sh first}
+      GITEA__server__DOMAIN: localhost
+      GITEA__server__ROOT_URL: http://localhost:13000/
+      GITEA__server__SSH_DOMAIN: localhost
+      GITEA__server__SSH_PORT: "12222"
+      GITEA__service__DISABLE_REGISTRATION: "true"
+    ports:
+      - "127.0.0.1:13000:3000"
+      - "127.0.0.1:12222:22"
+    volumes:
+      - gitea-data:/data
+    networks:
+      - gitea
+    cpus: 1.0
+    mem_limit: 1g
+    logging: *logging
+
+  redmine:
+    image: redmine:6.1-bookworm
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      REDMINE_DB_POSTGRES: postgres
+      REDMINE_DB_PORT: "5432"
+      REDMINE_DB_DATABASE: redmine
+      REDMINE_DB_USERNAME: redmine
+      REDMINE_DB_PASSWORD: ${REDMINE_DB_PASSWORD:?Run sh initialize-local-env.sh first}
+      REDMINE_SECRET_KEY_BASE: ${REDMINE_SECRET_KEY_BASE:?Run sh initialize-local-env.sh first}
+    ports:
+      - "127.0.0.1:13001:3000"
+    volumes:
+      - redmine-files:/usr/src/redmine/files
+    networks:
+      - redmine
+    cpus: 1.0
+    mem_limit: 1536m
+    logging: *logging
+
+networks:
+  gitea:
+  redmine:
+
+volumes:
+  postgres-data:
+  gitea-data:
+  redmine-files:

@@ -1,0 +1,4 @@
+# Copy to .backup.conf. This file is sourced by bash; only its owner should edit it.
+# Configure gdrive-backup as an rclone crypt remote on top of your Google Drive.
+# Use a dedicated folder for this stack and this server, not a shared backup root.
+RCLONE_DEST='gdrive-backup:greg-local-tools/server-1'

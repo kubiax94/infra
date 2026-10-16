@@ -1,0 +1,17 @@
+#!/bin/bash
+set -euo pipefail
+
+psql --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" \
+    --set=ON_ERROR_STOP=1 \
+    --set=gitea_password="$GITEA_DB_PASSWORD" \
+    --set=redmine_password="$REDMINE_DB_PASSWORD" <<'SQL'
+CREATE ROLE gitea LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD :'gitea_password';
+CREATE ROLE redmine LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD :'redmine_password';
+
+CREATE DATABASE gitea OWNER gitea;
+CREATE DATABASE redmine OWNER redmine;
+
+REVOKE ALL ON DATABASE gitea FROM PUBLIC;
+REVOKE ALL ON DATABASE redmine FROM PUBLIC;
+REVOKE ALL ON DATABASE postgres FROM PUBLIC;
+SQL
