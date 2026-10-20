@@ -20,8 +20,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./postgres-init.sh:/docker-entrypoint-initdb.d/10-app-databases.sh:ro
     networks:
-      - gitea
-      - redmine
+      - infra-net
     healthcheck:
       test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "postgres"]
       interval: 10s
@@ -55,7 +54,7 @@ services:
     volumes:
       - gitea-data:/data
     networks:
-      - gitea
+      - infra-net
     cpus: 1.0
     mem_limit: 1g
     logging: *logging
@@ -78,14 +77,13 @@ services:
     volumes:
       - redmine-files:/usr/src/redmine/files
     networks:
-      - redmine
+      - infra-net
     cpus: 1.0
     mem_limit: 1536m
     logging: *logging
 
 networks:
-  gitea:
-  redmine:
+  infra-net:
 
 volumes:
   postgres-data:
