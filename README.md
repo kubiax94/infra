@@ -7,6 +7,10 @@ zapotrzebowanie na zasoby zalezy od wielkosci repozytoriow i obciazenia.
 
 ## Wymagania i start
 
+Eksperymentalny test Redmine 7.0.2 z Google OIDC opisano w
+[OIDC-TEST.md](./OIDC-TEST.md). Nie zmienia on wersji dzialajacego stosu
+i nie stanowi jeszcze gotowej konfiguracji SSO ani listy dozwolonych adresow.
+
 Wymagany Linux, Docker Engine z Compose v2 i OpenSSL (polecenie `openssl`).
 Polecenia wykonuj w tym katalogu, w powloce systemowej:
 

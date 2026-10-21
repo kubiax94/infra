@@ -1,0 +1,8 @@
+FROM redmine:7.0.2-bookworm
+
+ADD https://github.com/enricohuang/redmine_oidc/archive/3d3eaaf6c17cd37b861306938fe33baabdd7b690.tar.gz /tmp/redmine-oidc.tar.gz
+RUN mkdir -p /usr/src/redmine/plugins/redmine_oidc \
+    && tar -xzf /tmp/redmine-oidc.tar.gz \
+        --strip-components=1 -C /usr/src/redmine/plugins/redmine_oidc \
+    && rm /tmp/redmine-oidc.tar.gz \
+    && chown -R redmine:redmine /usr/src/redmine/plugins/redmine_oidc

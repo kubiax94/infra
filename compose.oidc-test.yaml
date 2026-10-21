@@ -1,0 +1,48 @@
+name: greg-oidc-test
+
+services:
+  postgres:
+    image: postgres:16-bookworm
+    restart: "no"
+    environment:
+      POSTGRES_DB: redmine
+      POSTGRES_USER: redmine
+      POSTGRES_PASSWORD: ${REDMINE_DB_PASSWORD:?Run sh initialize-local-env.sh first}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "redmine", "-d", "redmine"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redmine:
+    build:
+      context: .
+      dockerfile: Dockerfile.redmine-oidc-test
+    image: greg-redmine-oidc-test:7.0.2
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      REDMINE_DB_POSTGRES: postgres
+      REDMINE_DB_DATABASE: redmine
+      REDMINE_DB_USERNAME: redmine
+      REDMINE_DB_PASSWORD: ${REDMINE_DB_PASSWORD:?Run sh initialize-local-env.sh first}
+      REDMINE_SECRET_KEY_BASE: ${REDMINE_SECRET_KEY_BASE:?Run sh initialize-local-env.sh first}
+      REDMINE_PLUGINS_MIGRATE: "true"
+    ports:
+      - "127.0.0.1:13002:3000"
+    volumes:
+      - redmine-files:/usr/src/redmine/files
+    logging: *logging
+
+volumes:
+  postgres-data:
+  redmine-files:
