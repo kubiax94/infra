@@ -60,24 +60,27 @@ services:
     logging: *logging
 
   redmine:
-    image: redmine:6.1-bookworm
-    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile.redmine-oidc-test
+    image: greg-redmine-oidc-test:7.0.2
+    restart: "no"
     depends_on:
       postgres:
         condition: service_healthy
     environment:
       REDMINE_DB_POSTGRES: postgres
-      REDMINE_DB_PORT: "5432"
       REDMINE_DB_DATABASE: redmine
       REDMINE_DB_USERNAME: redmine
       REDMINE_DB_PASSWORD: ${REDMINE_DB_PASSWORD:?Run sh initialize-local-env.sh first}
       REDMINE_SECRET_KEY_BASE: ${REDMINE_SECRET_KEY_BASE:?Run sh initialize-local-env.sh first}
+      REDMINE_PLUGINS_MIGRATE: "true"
     ports:
-      - "127.0.0.1:13001:3000"
+      - "127.0.0.1:13002:3000"
     volumes:
       - redmine-files:/usr/src/redmine/files
     networks:
-      - infra-net
+      - infra-net     
     cpus: 1.0
     mem_limit: 1536m
     logging: *logging
