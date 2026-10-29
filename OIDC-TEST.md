@@ -39,6 +39,17 @@ Wtyczki. Bledy startu/migracji oznaczaja, ze zgodnosc nie zostala potwierdzona.
 
 ## Google
 
+Najpierw w Redmine, Administracja > Ustawienia > Ogolne, ustaw:
+
+- Nazwa hosta i sciezka (Host name and path): `localhost:13002`, bez `http://`.
+- Protokol: `http`.
+
+Zapisz ustawienia i odswiez konfiguracje pluginu. Plugin generuje callback
+oraz awaryjny URL logowania na podstawie tych ustawien (`Setting.host_name`
+i `Setting.protocol`), nie mapowania portow Dockera. Domyslne `localhost:3000`
+w tym miejscu jest niepoprawne dla tunelu na porcie 13002.
+Nie zmieniaj portu wewnatrz kontenera; mapowanie `13002:3000` jest prawidlowe.
+
 W Google Cloud dodaj klienta OAuth typu **Web application**, z callbackiem:
 
 ```text

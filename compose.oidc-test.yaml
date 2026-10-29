@@ -2,7 +2,7 @@ name: greg-oidc-test
 
 services:
   postgres:
-    image: postgres:16-bookworm
+    image: postgres:18-alpine
     restart: "no"
     environment:
       POSTGRES_DB: redmine
